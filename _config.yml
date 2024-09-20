@@ -14,12 +14,12 @@ timezone: America/Monterrey
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
-title: Racc0x # the main title
+title: RaCc0x # the main title
 
-tagline: A minimal, responsive Blog for technical writing Hacking # it will display as the sub-title
+tagline: A blog about security, CTF writeups, Pro Labs, researches and more | Prepare for ECPPT, CPTS & OSCP certified
 
 description: >- # used by seo meta and the atom feed
-  A minimal, responsive Blog for technical writing Hacking.
+  A blog about security, CTF writeups, Pro Labs, researches and more.
 
 # Fill in the protocol & hostname for your site.
 # e.g. 'https://username.github.io', note that it does not end with a '/'.
@@ -96,7 +96,7 @@ theme_mode: # [light | dark]
 cdn:
 
 # the avatar on sidebar, support local or CORS resources
-avatar: "https://i.pinimg.com/564x/b9/c4/7e/b9c47ef70bff06613d397abfce02c6e7.jpg"
+avatar: "https://tiermaker.com/images/template_images/2022/1476819/nfijewifnsdaljbnvc-1476819/zzzzz-169902304815339f45bc104fe9afc3c7b8a1c99997.png"
 
 # The URL of the site-wide social preview image used in SEO `og:image` meta tag.
 # It can be overridden by a customized `page.image` in front matter.

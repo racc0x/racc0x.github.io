@@ -4,7 +4,7 @@ date: 2023-06-07 12:17:34 -0400
 categories: [hackthebox , TwoMillion]
 tags: [HackTheBox, API endpoints, API, CVE-2023-0386, nmap, web, rot13, curl,OverlaysFS Fuse]
 image:
-  path: /assets/img/post/twomillion/box-twomillion.png
+  path: /assets/img/post/twomillion/twomillion-card.png
   lqip: data:image/webp;base64,UklGRpoAAABXRUJQVlA4WAoAAAAQAAAADwAABwAAQUxQSDIAAAARL0AmbZurmr57yyIiqE8oiG0bejIYEQTgqiDA9vqnsUSI6H+oAERp2HZ65qP/VIAWAFZQOCBCAAAA8AEAnQEqEAAIAAVAfCWkAALp8sF8rgRgAP7o9FDvMCkMde9PK7euH5M1m6VWoDXf2FkP3BqV0ZYbO6NA/VFIAAAA
   alt: Hack the Box - TwoMillion.
 ---
