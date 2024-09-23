@@ -3,7 +3,7 @@ title: "Offensive Security CheatSheet"
 date: 1997-02-21 00:00:00 +8000
 categories: [Red team, Offensive Security, Cheatsheet]
 tags: []
-description: Offensive Security CheatSheet
+description: Offensive Security CheatSheet | Inspiration and Credits [s4thv1k-oscp-cheatsheet](https://s4thv1k.com/posts/oscp-cheatsheet/)
 image:
   path: /assets/img/post/offsec/offsec.png
   alt: Offensive Security Cheat Sheet
