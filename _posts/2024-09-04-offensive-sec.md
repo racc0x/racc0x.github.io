@@ -6,9 +6,9 @@ tags: []
 description: Offensive Security CheatSheet
 image:
   path: /assets/img/post/offsec/offsec.png
-  alt: Offensive Security Cheat Sheet
+  alt: Offensive Security Cheat Sheet 
 ---
-
+_Inspiration and Credits [s4thv1k-oscp-cheatsheet](https://s4thv1k.com/posts/oscp-cheatsheet/)_
 ## **Linux**
 
 ### Command Linux
